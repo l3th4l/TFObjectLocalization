@@ -1,0 +1,1 @@
+Object localization network for [Esri Data Science Challenge 2019](https://www.hackerearth.com/challenges/hiring/esri-data-science-challenge-2019/)

@@ -1,0 +1,17 @@
+#Dataset 
+Dataset/ 
+
+#Models
+Models/
+
+#pycache
+__pycache__/
+
+#ipython checkpoints 
+.ipynb_checkpints/
+
+#Notebooks 
+*.ipynb
+
+#Webpages 
+*.html
