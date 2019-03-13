@@ -8,7 +8,7 @@ def pool(x, pool_size, stride = [2, 2], padding = 'same', name = 'p'):
     with tf.variable_scope(name):
         return tf.layers.max_pooling2d(x, pool_size, strides = stride)
 
-def pred(self, x, scope = 'yolo'):
+def pred(x, scope = 'yolo'):
 
     with tf.variable_scope(scope, reuse = tf.AUTO_REUSE):
 
@@ -31,7 +31,7 @@ def pred(self, x, scope = 'yolo'):
         s_cnv1 = cnv2d(pool3, [4, 4], 128, [2, 2], 'valid', name = 'sc1') # --> 1 x 1 x 128
         s_cnv2 = cnv2d(s_cnv1, [1, 1], 64, name = 'sc2') # --> 1 x 1 x 64
         s_cnv3 = cnv2d(s_cnv2, [1, 1], 32, name = 'sc3') # --> 1 x 1 x 32
-        s_logit = cnv2d(s_cnv3, [1, 1], 2, name = 'sl') # --> 1 x 1 x 2
+        s_logit = cnv2d(s_cnv3, [1, 1], 3, name = 'sl') # --> 1 x 1 x 3
 
         s_out = tf.nn.softmax(s_logit, name = 'so')
 
