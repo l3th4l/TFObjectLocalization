@@ -9,11 +9,17 @@ import os
 
 #crop window size 
 cSize = 32 #64 pixels 
+f_per_image = 1
 
 dat_path = './Dataset/training_data'
 
 try: 
-        os.mkdir(dat_path + '/processed')
+        os.mkdir(dat_path + '/processed_imgs')
+except:
+        pass
+
+try: 
+        os.mkdir(dat_path + '/processed_false')
 except:
         pass
 
@@ -32,6 +38,17 @@ def process_dat(filename, path):
         img = np.pad(img, pad, mode = 'edge')[:, :, pad : pad + 3]
         pImg = Image.fromarray(img)
         print(img.shape)
+
+        imsize = 224
+        #False labels
+        for i in range(f_per_image):
+                p_x = np.random.randint(imsize) + pad
+                p_y = np.random.randint(imsize) + pad
+                #Crop image
+                cImg = pImg.crop([p_x - cSize // 2, p_y - cSize // 2, p_x + cSize // 2, p_y + cSize // 2])
+                #Save cropped image
+                cImg.save('%s/processed_false/%s_%i.png' % (path, filename[ : -4], i))
+        #Object labels
         for i, child in enumerate(root):
                 if child.tag == 'object':
                         #Get labels
@@ -43,26 +60,27 @@ def process_dat(filename, path):
                         #Mean coords 
                         xmean = np.mean([xmin, xmax]) + pad
                         ymean = np.mean([ymin, ymax]) + pad
-                        #crop image
-                        #cImg = img[int(xmean) - cSize // 2 + 1 : int(xmean) + cSize // 2 + pad, 
-                        #           int(ymean) - cSize // 2 + 1 : int(ymean) + cSize // 2 + pad]
+
+                        #Crop image
                         cImg = pImg.crop([xmean - cSize // 2, ymean - cSize // 2, xmean + cSize // 2, ymean + cSize // 2])
+
                         #Save cropped image
-                        #io.imsave('%s/processed/%s_%i.png' % (path, filename[ : -4], i), cImg)  
-                        cImg.save('%s/processed/%s_%i.png' % (path, filename[ : -4], i))
+                        cImg.save('%s/processed_imgs/%s_%i.png' % (path, filename[ : -4], i))
+
                         #Append the filename and label to the list 
                         imNames.append('%s_%i.png' % (filename[ : -4], i))
                         imBoxes.append(np.array([xmin - xmean, ymin - ymean, xmax - xmean, ymax - ymean]))
                         imClasses.append(obtype)
 
         return imNames, imBoxes, imClasses
-        
+
 namelist = os.listdir(dat_path + '/images')
 
 Names, Boxes, Classes = [], [], []
 
 for name in namelist:
         print(name)
+        process_dat(name, dat_path)
         t_Names, t_Boxes, t_Classes = process_dat(name, dat_path)
         Names.extend(t_Names)
         Boxes.extend(t_Boxes)
@@ -71,4 +89,3 @@ for name in namelist:
 labels = list(zip(Names, Boxes, Classes))
 
 labels_df = pd.DataFrame(labels, index = None, columns = ['filename', 'bounding_box', 'category'])
-labels_df.to_csv(dat_path + '/labels.csv', )
