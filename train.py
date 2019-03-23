@@ -3,7 +3,7 @@ import os
 
 #hyperparams 
 batch_size = 100 
-epochs = 20 
+epochs = 50
 
 #Data paths
 path = './Dataset/training_data/'
