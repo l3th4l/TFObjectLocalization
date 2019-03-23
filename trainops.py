@@ -79,9 +79,11 @@ s_loss = tf.nn.softmax_cross_entropy_with_logits_v2(labels = s_mod, logits = log
 b_loss = tf.losses.mean_squared_error(labels = b_mod, predictions = out_b)
 
 #Learning rate 
-lr = 0.0015
+lr = 0.00001
+
 #Optimizer 
 opt = tf.train.AdamOptimizer(learning_rate = lr)
+#opt = tf.train.GradientDescentOptimizer(learning_rate = lr)
 
 #Optimize ops
 s_opt = opt.minimize(s_loss)

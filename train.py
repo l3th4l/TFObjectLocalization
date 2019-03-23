@@ -52,6 +52,6 @@ for epoch in range(epochs):
 
         if i % 50 == 0:
             print('epoch_%i iter_%i cat_t : %f bound_t : %f cat_f : %f ' % (epoch, i, np.mean(sl_t), np.mean(bl_t), np.mean(sl_f)))
-            saver.save(sess, './models/weights_%i_%i.ckpt' % (epoch, i))
+            saver.save(sess, './models/v1/weights_%i_%i.ckpt' % (epoch, i))
 
 saver.save(sess, './models/weightV1.ckpt')
