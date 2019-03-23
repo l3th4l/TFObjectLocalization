@@ -40,6 +40,7 @@ def process_dat(filename, path):
         print(img.shape)
 
         imsize = 224
+        '''
         #False labels
         for i in range(f_per_image):
                 p_x = np.random.randint(imsize) + pad
@@ -48,6 +49,7 @@ def process_dat(filename, path):
                 cImg = pImg.crop([p_x - cSize // 2, p_y - cSize // 2, p_x + cSize // 2, p_y + cSize // 2])
                 #Save cropped image
                 cImg.save('%s/processed_false/%s_%i.png' % (path, filename[ : -4], i))
+        '''
         #Object labels
         for i, child in enumerate(root):
                 if child.tag == 'object':
@@ -86,6 +88,6 @@ for name in namelist:
         Boxes.extend(t_Boxes)
         Classes.extend(t_Classes)
 
-labels = list(zip(Names, Boxes, Classes))
+labels = list(zip(Names, Classes, Boxes))
 
-labels_df = pd.DataFrame(labels, index = None, columns = ['filename', 'bounding_box', 'category'])
+labels_df = pd.DataFrame(labels, index = None, columns = ['filename', 'category', 'bounding_box'])

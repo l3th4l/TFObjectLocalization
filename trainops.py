@@ -3,11 +3,12 @@ from skimage import transform as tr
 from skimage import io 
 import pandas as pd 
 import numpy as np 
+import re
 
 import net
 
 #fetch data 
-def datFetch(dat, path, batch_size, iteration = 0, offset = 0, aug_chance = 0.3):
+def datFetch(dat, path, batch_size, iteration = 0, offset = 0, aug_chance = 0.3, load_box = True):
     imgs = []
     bboxes = []
     categories = []
@@ -16,19 +17,28 @@ def datFetch(dat, path, batch_size, iteration = 0, offset = 0, aug_chance = 0.3)
     for index in indexes:
         
         #Image
-        img = io.imread('./%s/%s' % (path, dat.loc[index][1])) / 255
+        img = io.imread('./%s/%s' % (path, dat.loc[index]['filename'])) / 255
         r = np.random.uniform() #Random float between 0-1
         if r <= aug_chance:
             img = augment(img)
         imgs.append(img.flatten())
 
-        #Bounding box
-        bbox = np.array(dat.loc[index][2][1 : -1])
-        bboxes.append(bbox)
-
         #Category 
         onehot = np.identity(3)
-        categories.append(onehot[dat.loc[index][3]])
+        categories.append(onehot[int(dat.loc[index]['category'])])
+        
+        #Bounding box
+        if load_box:
+            bbox = np.array(re.sub(' +', ' ', dat.loc[index]['bounding_box'][1 : -2]).split(' ')[:4], np.float)
+            bboxes.append(bbox)
+
+        '''
+        try:            
+            bbox = np.array(re.sub(' +', ' ', dat.loc[index]['bounding_box'][1 : -2]).split(' '), np.float)
+            bboxes.append(bbox)
+        except:
+            pass'''
+
     
     return np.array(imgs), np.array(bboxes), np.array(categories)
     
@@ -53,12 +63,20 @@ b_reshped = tf.reshape(b, shape = [-1, 1, 1, 4])
 
 logits_s, out_s, out_b = net.pred(x_reshaped) # outputs
 
+#'1' tensors
+s_ones = tf.ones_like(logits_s)
+b_ones = tf.ones_like(out_b)
+
+#Modified labels
+s_mod = tf.multiply(s_reshaped, s_ones)
+b_mod = tf.multiply(b_reshped, b_ones)
+
 #Losses 
 #category 
-s_loss = tf.nn.softmax_cross_entropy_with_logits_v2(labels = s_reshaped, logits = logits_s)
+s_loss = tf.nn.softmax_cross_entropy_with_logits_v2(labels = s_mod, logits = logits_s)
 
 #bounding box
-c_loss = tf.losses.mean_squared_error(labels = b_reshped, predictions = out_b)
+b_loss = tf.losses.mean_squared_error(labels = b_mod, predictions = out_b)
 
 #Learning rate 
 lr = 0.0015
@@ -67,4 +85,4 @@ opt = tf.train.AdamOptimizer(learning_rate = lr)
 
 #Optimize ops
 s_opt = opt.minimize(s_loss)
-c_opt = opt.minimize(c_loss)
+b_opt = opt.minimize(b_loss)
