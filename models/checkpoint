@@ -1,6 +1,0 @@
-model_checkpoint_path: "weights_19_128.ckpt"
-all_model_checkpoint_paths: "weights_18_100.ckpt"
-all_model_checkpoint_paths: "weights_19_0.ckpt"
-all_model_checkpoint_paths: "weights_19_50.ckpt"
-all_model_checkpoint_paths: "weights_19_100.ckpt"
-all_model_checkpoint_paths: "weights_19_128.ckpt"
