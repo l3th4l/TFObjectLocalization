@@ -2,7 +2,7 @@
 Dataset/ 
 
 #Models
-.ckpt
+models/*
 !weightV1.ckpt
 
 #pycache
