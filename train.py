@@ -3,7 +3,7 @@ import os
 
 #hyperparams 
 batch_size = 100 
-epochs = 50
+epochs = 500
 
 #Data paths
 path = './Dataset/training_data/'
@@ -32,26 +32,30 @@ init = tf.global_variables_initializer()
 sess = tf.InteractiveSession()
 
 #Saver 
-saver = tf.train.Saver(tf.trainable_variables())
+saver = tf.train.Saver()
 
 #Training loop 
 sess.run(init)
-
+'''
+#Load model
+mdl_path = './models/weightV1.ckpt'
+saver.restore(sess, mdl_path)
+'''
 for epoch in range(epochs):
     for i in range(tr_split // batch_size):
         #True labels 
-        x_true, b_true, s_true = datFetch(dat_true, path_objs, batch_size, i, aug_chance = 0.3)
+        d_true, x_true, b_true, c_true = datFetch(dat_true, path_objs, batch_size, i, aug_chance = 0.3)
         #False labels
         ind = np.random.randint(false_dat_len // batch_size - 1) 
-        x_false, _, s_false = datFetch(dat_false, path_false, batch_size, ind, aug_chance = 0.3, load_box = False)
+        d_false, x_false, _, _ = datFetch(dat_false, path_false, batch_size, ind, aug_chance = 0.3, load_box = False)
     
         #Optimize true labels
-        _, _, sl_t, bl_t = sess.run([s_opt, b_opt, s_loss, b_loss], feed_dict = {x : x_true, s : s_true, b : b_true})
+        _, _, _, dl_t, cl_t, bl_t = sess.run([d_opt, c_opt, b_opt, d_loss, c_loss, b_loss], feed_dict = {x : x_true, c : c_true, b : b_true, d : d_true})
         #Optimize false labels
-        _, sl_f = sess.run([s_opt, s_loss], feed_dict = {x : x_false, s : s_false})
+        _, dl_f = sess.run([d_opt, d_loss], feed_dict = {x : x_false, d : d_false})
 
         if i % 50 == 0:
-            print('epoch_%i iter_%i cat_t : %f bound_t : %f cat_f : %f ' % (epoch, i, np.mean(sl_t), np.mean(bl_t), np.mean(sl_f)))
+            print('epoch_%i iter_%i det_t : %f cat_t : %f bound_t : %f det_f : %f ' % (epoch, i, np.mean(dl_t), np.mean(cl_t), np.mean(bl_t), np.mean(dl_f)))
             saver.save(sess, './models/v1/weights_%i_%i.ckpt' % (epoch, i))
 
 saver.save(sess, './models/weightV1.ckpt')

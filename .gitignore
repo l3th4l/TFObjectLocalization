@@ -4,6 +4,20 @@ Dataset/
 #Models
 models/v1/
 
+#masklabels
+masklabels.py
+
+#modelexport
+modelexport.py
+
+#log
+log/
+
+#tfgraph 
+frozentfgraph.pb
+tfgraph.pb
+tfgraph.pbtxt
+
 #pycache
 __pycache__/
 

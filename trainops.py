@@ -5,13 +5,14 @@ import pandas as pd
 import numpy as np 
 import re
 
-import net
+import netv2 as net
 
 #fetch data 
 def datFetch(dat, path, batch_size, iteration = 0, offset = 0, aug_chance = 0.3, load_box = True):
     imgs = []
     bboxes = []
     categories = []
+    detection = []
 
     indexes = np.array(range(batch_size)) + iteration * batch_size + offset
     for index in indexes:
@@ -25,7 +26,13 @@ def datFetch(dat, path, batch_size, iteration = 0, offset = 0, aug_chance = 0.3,
 
         #Category 
         onehot = np.identity(3)
-        categories.append(onehot[int(dat.loc[index]['category'])])
+        onehot[0, 0] = 0
+        onehot = onehot[1 : , 1 : ]
+        try:
+            categories.append(onehot[int(dat.loc[index]['category']) - 1])
+            detection.append(1)
+        except:
+            detection.append(0)
         
         #Bounding box
         if load_box:
@@ -40,7 +47,7 @@ def datFetch(dat, path, batch_size, iteration = 0, offset = 0, aug_chance = 0.3,
             pass'''
 
     
-    return np.array(imgs), np.array(bboxes), np.array(categories)
+    return np.array(detection),  np.array(imgs), np.array(bboxes), np.array(categories)
     
 #augment data
 def augment(x):
@@ -53,38 +60,38 @@ def augment(x):
 x = tf.placeholder(tf.float32, shape = [None, 32 * 32 * 3])
 x_reshaped = tf.reshape(x, shape = [-1, 32, 32, 3])
 
+#obj detection
+d = tf.placeholder(tf.float32, shape = [None])
+d_reshaped = tf.reshape(d, shape = [-1, 1, 1, 1])
+
 #category
-s = tf.placeholder(tf.float32, shape = [None, 3])
-s_reshaped = tf.reshape(s, shape = [-1, 1, 1, 3])
+c = tf.placeholder(tf.float32, shape = [None, 2])
+c_reshaped = tf.reshape(c, shape = [-1, 1, 1, 2])
 
 #bounding box
 b = tf.placeholder(tf.float32, shape = [None, 4])
-b_reshped = tf.reshape(b, shape = [-1, 1, 1, 4])
+b_reshaped = tf.reshape(b, shape = [-1, 1, 1, 4])
 
-logits_s, out_s, out_b = net.pred(x_reshaped) # outputs
+logit_d, logit_c, out_d, out_c, out_b = net.pred(x_reshaped) # outputs
 
-#'1' tensors
-s_ones = tf.ones_like(logits_s)
-b_ones = tf.ones_like(out_b)
-
-#Modified labels
-s_mod = tf.multiply(s_reshaped, s_ones)
-b_mod = tf.multiply(b_reshped, b_ones)
 
 #Losses 
-#category 
-s_loss = tf.nn.softmax_cross_entropy_with_logits_v2(labels = s_mod, logits = logits_s)
 
+#obj detection
+d_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = d_reshaped, logits = logit_d)
+#category 
+c_loss = tf.nn.softmax_cross_entropy_with_logits_v2(labels = c_reshaped, logits = logit_c)
 #bounding box
-b_loss = tf.losses.mean_squared_error(labels = b_mod, predictions = out_b)
+b_loss = tf.losses.mean_squared_error(labels = b_reshaped, predictions = out_b)
 
 #Learning rate 
 lr = 0.00001
 
 #Optimizer 
-opt = tf.train.AdamOptimizer(learning_rate = lr)
+opt = tf.train.AdamOptimizer(learning_rate = lr, beta1 = 0.5)
 #opt = tf.train.GradientDescentOptimizer(learning_rate = lr)
 
 #Optimize ops
-s_opt = opt.minimize(s_loss)
+d_opt = opt.minimize(d_loss)
+c_opt = opt.minimize(c_loss)
 b_opt = opt.minimize(b_loss)
