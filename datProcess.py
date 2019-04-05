@@ -8,8 +8,8 @@ import pandas as pd
 import os
 
 #crop window size 
-cSize = 32 #64 pixels 
-f_per_image = 1
+cSize = 64 #pixels 
+f_per_image = 2
 
 dat_path = './Dataset/training_data'
 
@@ -25,7 +25,6 @@ except:
 
 def process_dat(filename, path):
         xml_file = '%s/labels/%s.xml' % (path, filename[ : -4])
-        print(filename[ : -4])
         tree = ET.parse(xml_file)
         root = tree.getroot()   
         imNames = []
@@ -37,10 +36,9 @@ def process_dat(filename, path):
         pad = cSize // 2 + 5
         img = np.pad(img, pad, mode = 'edge')[:, :, pad : pad + 3]
         pImg = Image.fromarray(img)
-        print(img.shape)
 
         imsize = 224
-        '''
+
         #False labels
         for i in range(f_per_image):
                 p_x = np.random.randint(imsize) + pad
@@ -49,7 +47,7 @@ def process_dat(filename, path):
                 cImg = pImg.crop([p_x - cSize // 2, p_y - cSize // 2, p_x + cSize // 2, p_y + cSize // 2])
                 #Save cropped image
                 cImg.save('%s/processed_false/%s_%i.png' % (path, filename[ : -4], i))
-        '''
+
         #Object labels
         for i, child in enumerate(root):
                 if child.tag == 'object':

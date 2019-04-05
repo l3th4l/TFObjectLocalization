@@ -3,7 +3,7 @@ import os
 
 #hyperparams 
 batch_size = 100 
-epochs = 500
+epochs = 200
 
 #Data paths
 path = './Dataset/training_data/'
@@ -36,6 +36,8 @@ saver = tf.train.Saver()
 
 #Training loop 
 sess.run(init)
+
+#saver.restore(sess, './models/v1/weights_%i_%i.ckpt' % (364, 50))
 '''
 #Load model
 mdl_path = './models/weightV1.ckpt'
@@ -48,6 +50,7 @@ for epoch in range(epochs):
         #False labels
         ind = np.random.randint(false_dat_len // batch_size - 1) 
         d_false, x_false, _, _ = datFetch(dat_false, path_false, batch_size, ind, aug_chance = 0.3, load_box = False)
+        d_false = d_false * 0
     
         #Optimize true labels
         _, _, _, dl_t, cl_t, bl_t = sess.run([d_opt, c_opt, b_opt, d_loss, c_loss, b_loss], feed_dict = {x : x_true, c : c_true, b : b_true, d : d_true})

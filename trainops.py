@@ -57,8 +57,8 @@ def augment(x):
 
 #placeholders 
 #input
-x = tf.placeholder(tf.float32, shape = [None, 32 * 32 * 3])
-x_reshaped = tf.reshape(x, shape = [-1, 32, 32, 3])
+x = tf.placeholder(tf.float32, shape = [None, 64 * 64 * 3])
+x_reshaped = tf.reshape(x, shape = [-1, 64, 64, 3])
 
 #obj detection
 d = tf.placeholder(tf.float32, shape = [None])
@@ -85,7 +85,7 @@ c_loss = tf.nn.softmax_cross_entropy_with_logits_v2(labels = c_reshaped, logits 
 b_loss = tf.losses.mean_squared_error(labels = b_reshaped, predictions = out_b)
 
 #Learning rate 
-lr = 0.00001
+lr = 0.0001
 
 #Optimizer 
 opt = tf.train.AdamOptimizer(learning_rate = lr, beta1 = 0.5)

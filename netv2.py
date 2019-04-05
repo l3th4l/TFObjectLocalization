@@ -16,17 +16,23 @@ def pred(x, scope = 'yolo'):
     with tf.variable_scope(scope, reuse = tf.AUTO_REUSE):
 
         cnv1 = cnv2d(x, [5, 5], 16, name = 'c1')                                                # --> 28 x 28 x 16
-        pool1 = pool(cnv1, [2, 2], name = 'p1')                                                 # --> 14 x 14 x 16 
+        pool1 = pool(cnv1, [5, 5],stride = [5, 5], name = 'p1')                                 # --> 14 x 14 x 16 
 
-        cnv2 = cnv2d(pool1, [14, 14], 400, name = 'c2')                                         # --> 1 x 1 x 400
+        cnv2 = cnv2d(pool1, [12, 12], 400, name = 'c2')                                         # --> 1 x 1 x 400
         fc1 = cnv2d(cnv2, [1, 1], 400, name = 'fc1')                                            # --> 1 x 1 x 400
         fc1 = k.layers.Dropout(tf_prob)(fc1)                                                    # dropout
+
+        fc2 = cnv2d(fc1, [1, 1], 400, name = 'fc2')                                             # --> 1 x 1 x 400
+        fc2 = k.layers.Dropout(tf_prob)(fc2)                                                    # dropout
+
+        fc3 = cnv2d(fc2, [1, 1], 400, name = 'fc3')                                             # --> 1 x 1 x 400
+        fc3 = k.layers.Dropout(tf_prob)(fc3)                                                    # dropout
         
         #---------------------------------------------------------------------------------------
 
         #Obj detection        
 
-        d_fc1 = cnv2d(fc1, [1, 1], 32, name = 'dfc1')                                           # --> 1 x 1 x 32
+        d_fc1 = cnv2d(fc3, [1, 1], 32, name = 'dfc1')                                           # --> 1 x 1 x 32
 
         d_fc1 = tf.layers.batch_normalization(d_fc1)                                            # batch norm
 
@@ -36,7 +42,7 @@ def pred(x, scope = 'yolo'):
         
         #Classification
 
-        c_fc1 = cnv2d(fc1, [1, 1], 32, name = 'cfc1')                                           # --> 2 x 2 x 32
+        c_fc1 = cnv2d(fc3, [1, 1], 32, name = 'cfc1')                                           # --> 2 x 2 x 32
 
         c_fc1 = tf.layers.batch_normalization(c_fc1)                                            # batch norm
 
@@ -47,7 +53,7 @@ def pred(x, scope = 'yolo'):
         #---------------------------------------------------------------------------------------
 
         #Bounding box        
-        b_fc1 = cnv2d(fc1, [1, 1], 32, name = 'bfc1')                                           # --> 2 x 2 x 128
+        b_fc1 = cnv2d(fc3, [1, 1], 32, name = 'bfc1')                                           # --> 2 x 2 x 128
         
         b_fc1 = tf.layers.batch_normalization(b_fc1)                                            # batch norm
 

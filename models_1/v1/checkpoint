@@ -1,0 +1,6 @@
+model_checkpoint_path: "weights_499_100.ckpt"
+all_model_checkpoint_paths: "weights_498_50.ckpt"
+all_model_checkpoint_paths: "weights_498_100.ckpt"
+all_model_checkpoint_paths: "weights_499_0.ckpt"
+all_model_checkpoint_paths: "weights_499_50.ckpt"
+all_model_checkpoint_paths: "weights_499_100.ckpt"
